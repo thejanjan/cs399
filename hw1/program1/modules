@@ -1,0 +1,2 @@
+module load nvhpc
+module load nvc

@@ -1,0 +1,3 @@
+module load nvhpc
+module load nvc
+module load python3
