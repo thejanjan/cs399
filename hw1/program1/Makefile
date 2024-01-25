@@ -1,9 +1,9 @@
 CFLAGS=-W -Wall -I/usr/local/include -g
 
-all: main
+all: montecarlopi
 
-main: main.c
-	nvc -fast -Minfo=accel -acc -o $@ $^
+montecarlopi: montecarlopi.c
+	#nvc -fast -Minfo=accel -acc -o $@ $^
 
 clean:
-	rm -f main main.o
+	rm -f montecarlopi montecarlopi.o
