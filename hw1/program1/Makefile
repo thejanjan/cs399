@@ -3,7 +3,7 @@ CFLAGS=-W -Wall -I/usr/local/include -g
 all: montecarlopi
 
 montecarlopi: montecarlopi.c
-	#nvc -fast -Minfo=accel -acc -o $@ $^
+	nvc -acc --gcc-toolchain=/usr/bin -o $@ $^
 
 clean:
 	rm -f montecarlopi montecarlopi.o

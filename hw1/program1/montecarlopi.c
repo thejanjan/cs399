@@ -30,28 +30,18 @@ int main(int argc, char *argv[]) {
 
     // generate random points
     srand(time(NULL));
-
-    // NOTE: it would be much more efficient to not have to allocate memory
-    //  for this and just do calculations with bare randf() calls,
-    //  but the rubric requests specifically "generate N random 2-dimensional points",
-    //  so i'm interpreting it as such
-    #pragma acc enter data create(points_x[0:num_points], points_y[0:num_points])
-
-    #pragma acc parallel loop
     for (int i = 0; i < num_points; i++) {
         points_x[i] = randf();
         points_y[i] = randf();
     }
 
     // calculate how many points are valid
-    #pragma acc parallel loop reduction(+:bounded_points)
+    #pragma acc parallel loop reduction(+:bounded_points) copyin(points_x[0:num_points], points_y[0:num_points])
     for (int i = 0; i < num_points; i++) {
         if (((points_x[i] * points_x[i]) + (points_y[i] * points_y[i])) <= 1.0) {
             bounded_points++;
         }
     }
-
-    #pragma acc exit data delete(points_x, points_y)
 
     // calculate pi, display results
     float pi_approx = 4.0f * ((float)bounded_points / (float)num_points);

@@ -50,3 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+.idea/cs399.iml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
