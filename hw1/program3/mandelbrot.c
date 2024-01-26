@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     int *iter_out = (int *)malloc(numx * numy * sizeof(int));
 
     // Iterate over each grid point.
-    #pragma acc parallel loop copyout(iterout[0:numx*numy])
+    #pragma acc parallel loop copyout(iter_out[0:numx*numy])
     for (int i = 0; i < (numx * numy); i++) {
         // Calculate x and y index.
         int xi = i % numx;
