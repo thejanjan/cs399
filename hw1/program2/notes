@@ -1,0 +1,3 @@
+load modules, run make, and then submit the sbatch.
+
+the job is configured for one minute and a size of 100,000, but could also be turned up again
