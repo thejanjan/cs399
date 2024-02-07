@@ -1,0 +1,2 @@
+load modules, run make, and then submit the sbatch.
+python3 module is included for running the heat python file.
