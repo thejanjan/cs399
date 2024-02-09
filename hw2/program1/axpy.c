@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
         // Set float values on GPU
         #pragma acc parallel loop gang
         for (int i = 0; i < n; i++) {
-            #pragma acc parallel loop vector
+            #pragma acc loop vector
             for (int j = 0; j < n; j++) {
                 x[i][j] = 1.0f;
                 y[i][j] = 2.0f;
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
         // Compute sum over array
         #pragma acc parallel loop gang
         for (int i = 0; i < n; i++) {
-            #pragma acc parallel loop vector
+            #pragma acc loop vector
             for (int j = 0; j < n; j++) {
                 y[i][j] = a*x[i][j]+y[i][j];
             }

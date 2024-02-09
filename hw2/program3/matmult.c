@@ -66,10 +66,10 @@ int main(int argc, char *argv[]) {
     start_benchmark();
     #pragma acc parallel loop gang copyin(A[0:n][0:m], B[0:m][0:n]) copyout(C[0:n][0:n])
     for (int i = 0; i < n; i++) {
-        #pragma acc parallel loop worker
+        #pragma acc loop worker
         for (int j = 0; j < n; j++) {
             float result = 0.0f;
-            #pragma acc parallel loop vector reduction(+:result)
+            #pragma acc loop vector reduction(+:result)
             for (int k = 0; k < m; k++) {
                 result += A[i][k]*B[k][j];
             }
@@ -91,10 +91,10 @@ int main(int argc, char *argv[]) {
     start_benchmark();
     #pragma acc parallel loop gang copyin(A[0:n][0:m], B2[0:n][0:m]) copyout(C[0:n][0:n])
     for (int i = 0; i < n; i++) {
-        #pragma acc parallel loop worker
+        #pragma acc loop worker
         for (int j = 0; j < n; j++) {
             float result = 0.0f;
-            #pragma acc parallel loop vector reduction(+:result)
+            #pragma acc loop vector reduction(+:result)
             for (int k = 0; k < m; k++) {
                 result += A[i][k]*B2[j][k];
             }
@@ -107,10 +107,10 @@ int main(int argc, char *argv[]) {
     start_benchmark();
     #pragma acc parallel loop gang copyin(A2[0:m][0:n], B[0:m][0:n]) copyout(C[0:n][0:n])
     for (int i = 0; i < n; i++) {
-        #pragma acc parallel loop worker
+        #pragma acc loop worker
         for (int j = 0; j < n; j++) {
             float result = 0.0f;
-            #pragma acc parallel loop vector reduction(+:result)
+            #pragma acc loop vector reduction(+:result)
             for (int k = 0; k < m; k++) {
                 result += A2[k][i]*B[k][j];
             }
