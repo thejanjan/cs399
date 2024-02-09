@@ -50,65 +50,67 @@ int main(int argc, char *argv[]) {
     // Loop over each iteration
     float err;
     #pragma acc data copyin(A[0:n][0:n], Anew[0:n][0:n])
-    for (int iter = 1; iter <= max_iter; iter++) {
-        err = 0.0f;
+	{
+		for (int iter = 1; iter <= max_iter; iter++) {
+			err = 0.0f;
 
-        // Initial heat displacement loop
-        #pragma acc parallel loop gang reduction(max:err)
-        for (int i = 1; i < (n-1); i++) {
-            #pragma acc loop vector reduction(max:err)
-            for (int j = 1; j < (n-1); j++) {
-                Anew[i][j] = (A[i+1][j] + A[i-1][j] + A[i][j-1] + A[i][j+1])/4;
-                err = fmaxf(err, fabs(Anew[i][j] - A[i][j]));
-            }
-        }
+			// Initial heat displacement loop
+			#pragma acc parallel loop gang reduction(max:err)
+			for (int i = 1; i < (n-1); i++) {
+				#pragma acc loop vector reduction(max:err)
+				for (int j = 1; j < (n-1); j++) {
+					Anew[i][j] = (A[i+1][j] + A[i-1][j] + A[i][j-1] + A[i][j+1])/4;
+					err = fmaxf(err, fabs(Anew[i][j] - A[i][j]));
+				}
+			}
 
-        // Copy Anew into A
-        #pragma acc parallel loop gang
-        for (int i = 1; i < n-1; i++) {
-            #pragma acc loop vector
-            for (int j = 1; j < n-1; j++) {
-                A[i][j] = Anew[i][j];
-            }
-        }
+			// Copy Anew into A
+			#pragma acc parallel loop gang
+			for (int i = 1; i < n-1; i++) {
+				#pragma acc loop vector
+				for (int j = 1; j < n-1; j++) {
+					A[i][j] = Anew[i][j];
+				}
+			}
 
-        // Are we printing a csv file?
-        if ((iter % 1000) == 0) {
-            // Yes, so do it.
-            // Sync memory to CPU.
-            #pragma acc update self(Anew[0:n][0:n])
+			// Are we printing a csv file?
+			if ((iter % 1000) == 0) {
+				// Yes, so do it.
+				// Sync memory to CPU.
+				#pragma acc update self(Anew[0:n][0:n])
 
-            // Now print it out as csv.
-            char *fname = (char *)malloc(20 * sizeof(char));
-            if (fname == NULL) {
-                printf("Error when allocating filename");
-                continue;
-            }
-            snprintf(fname, 20, "heat_%d.csv", iter);
-            FILE *fp = fopen(fname, "w");
-            if (fp == NULL) {
-                free(fname);
-                printf("Error when creating csv");
-                continue;
-            }
-            for (int y = 0; y < n; y++){
-                for (int x = 0; x < n; x++){
-                    fprintf(fp, "%f%s",
-                        Anew[y][x],       // write number
-                        ((x + 1) == n) ? "\n" : ","  // add comma, unless end of line
-                    );
-                }
-            }
-            fclose(fp);
-            free(fname);
-        }
+				// Now print it out as csv.
+				char *fname = (char *)malloc(20 * sizeof(char));
+				if (fname == NULL) {
+					printf("Error when allocating filename");
+					continue;
+				}
+				snprintf(fname, 20, "heat_%d.csv", iter);
+				FILE *fp = fopen(fname, "w");
+				if (fp == NULL) {
+					free(fname);
+					printf("Error when creating csv");
+					continue;
+				}
+				for (int y = 0; y < n; y++){
+					for (int x = 0; x < n; x++){
+						fprintf(fp, "%f%s",
+							Anew[y][x],       // write number
+							((x + 1) == n) ? "\n" : ","  // add comma, unless end of line
+						);
+					}
+				}
+				fclose(fp);
+				free(fname);
+			}
 
-        // If the heat has not changed within tolerance, break loop
-        if (err <= tol) {
-            printf("Tolerance reached at iteration %d\n", iter);
-            break;
-        }
-    }
+			// If the heat has not changed within tolerance, break loop
+			if (err <= tol) {
+				printf("Tolerance reached at iteration %d\n", iter);
+				break;
+			}
+		}
+	}
 
     // Cleanups
     for (int i = 0; i < n; i++) {
