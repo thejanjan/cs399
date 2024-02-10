@@ -1,1 +1,12 @@
 load modules, run make, and then submit the sbatch.
+
+with an n and m of 1000, my times were:
+
+- A*B: 276ms
+- A*B, transposed B: 21ms
+- A*B, transposed A: 40ms
+
+the performance difference when using a transposed matrix is pretty staggering.
+when not using any transposed matrices, the sum operation for k involved the accesses of A[i][k]*B[k][j], which aren't aligned.
+transposing them either way provides a substantial speedup, since the memory hops for each array access become equal.
+it's best with a transposed B however, since that makes each float become adjacent to one another in memory.
