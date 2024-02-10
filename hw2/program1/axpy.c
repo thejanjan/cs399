@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     // Data region for 2d arrays on GPU
     start_benchmark();
-    #pragma acc data create(x[0:n][0:n], y[0:n][0:n])
+    #pragma acc data create(x[:n][:n], y[:n][:n])
     {
         // Set float values on GPU
         #pragma acc parallel loop gang
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Copy result back to CPU
-        #pragma acc update self(x[0:n*n], y[0:n*n])
+        #pragma acc update self(x[:n][:n], y[:n][:n])
     }
     end_benchmark("GPU process time", n);
 
