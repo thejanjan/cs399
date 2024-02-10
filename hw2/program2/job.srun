@@ -8,4 +8,4 @@
 #SBATCH --cpus-per-task=10   ### number of threads to launch (for multicore)
 #SBATCH --account=cs399      ### PIRG to charge time to, use this one
 
-./heat -n 100 -tol 1 -max_iter 10000  ### command to run program and all its options
+./heat -n 256 -tol 0.01 -max_iter 10000  ### command to run program and all its options
