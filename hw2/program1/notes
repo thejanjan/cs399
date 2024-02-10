@@ -1,1 +1,10 @@
 load modules, run make, and then submit the sbatch.
+
+here are the clauses and times i verified (sizes 10000):
+
+1. no clauses: 699ms
+2. gang outer, vector inner: 208ms
+3. gang outer, worker inner: 213ms
+4. worker outer, vector inner: 685ms
+
+using the clauseless state as a control reference, #2 provided the largest speedup (and is recommended by openACC documentation, putting gang on outermost loops and vector on innermost). which makes it surprising that #3 had similar results (i don't have enough confidence in GPU viscera to hazard a guess here). #4 reveals that avoiding gang on the outer causes the gpu to throw a fit, providing practically no speedup whatsoever.
