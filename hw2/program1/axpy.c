@@ -27,11 +27,12 @@ void end_benchmark(char *name, int array_size) {
 
 void verify_results(float **out, int n, float a) {
 	bool success = true;
-	float output_val = (2.0f * 2.0f) + 1.0f;  // a*x+y
+	float output_val = a * 1.0f + 2.0f;  // a*x+y
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			if (out[i][j] != output_val) {
-				printf("Verify Failure - y[%f][%f] == %f and not %f\n", i, j, out[i][j], output_val);
+				printf("Verify Failure - at y[%d][%d]\n", i, j);
+                printf("%f != %f\n", out[i][j], output_val);
 				success = false;
 			}
 		}
