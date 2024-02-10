@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --partition=gpu      ### which partition to run on, can use compute for multicore
+#SBATCH --partition=preempt  ### which partition to run on, can use compute for multicore
 #SBATCH --job-name=hw2-pg3   ### name of your job, can be whatever
 #SBATCH --time=00:01:00      ### estimated time, hh:mm:ss (if you go over, slurm will kill it)
 #SBATCH --nodes=1            ### number of nodes you request (for now, just 1)
