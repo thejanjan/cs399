@@ -8,4 +8,4 @@
 #SBATCH --cpus-per-task=10   ### number of threads to launch (for multicore)
 #SBATCH --account=cs399      ### PIRG to charge time to, use this one
 
-./axpy -n 1000  ### command to run program and all its options
+./axpy -n 2000  ### command to run program and all its options
