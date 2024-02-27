@@ -1,0 +1,4 @@
+load modules, run make, and then submit the sbatch.
+python3 module is included for running the mandelbrot python file.
+
+the job is configured for one minute and a size of 1000x1000, but could also be turned up
