@@ -6,7 +6,7 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
-const THREADS = 256;
+const int THREADS = 256;
 
 __global__
 void monte_carlo(int *point_counts) {

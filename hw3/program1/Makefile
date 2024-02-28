@@ -1,4 +1,4 @@
-CFLAGS= -lcurand -W -Wall -I/usr/local/include -g
+CFLAGS= -lcurand -I/usr/local/include -g
 
 all: montecarlopi
 
