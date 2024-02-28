@@ -6,7 +6,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-const THREADS = 256;
+const int THREADS = 256;
 
 ///
 /// Benchmark functions

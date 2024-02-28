@@ -1,4 +1,4 @@
-CFLAGS=-W -Wall -I/usr/local/include -g
+CFLAGS=-I/usr/local/include -g
 
 all: mandelbrot
 

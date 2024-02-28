@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-const THREADS = 256;
-const MAX_ITER = 1000;
+const int THREADS = 256;
+const int MAX_ITER = 1000;
 
 __global__ void mandelbrot(int *iter_out, int numx, int numy) {
     // get thread idx

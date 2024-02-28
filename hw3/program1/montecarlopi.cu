@@ -50,6 +50,8 @@ int main(int argc, char *argv[]) {
     ///
     /// Monte Carlo algorithm
     ///
+	
+	printf("Running with %d points\n", num_points);
 
     // allocate host and device memory
     int BLOCKS = (num_points + THREADS - 1);
@@ -57,13 +59,16 @@ int main(int argc, char *argv[]) {
     int *point_counts, *d_point_counts;
     point_counts = (int *)malloc(num_points * sizeof(int));
     cudaMalloc(&d_point_counts, num_points * sizeof(int));
+	printf("Memory allocated\n");
 
     // perform kernel
     monte_carlo<<<BLOCKS, THREADS>>>(d_point_counts);
+	printf("Kernel performed\n");
 
     // collect result
     cudaMemcpy(point_counts, d_point_counts, sizeof(int) * num_points, cudaMemcpyDeviceToHost);
     cudaFree(d_point_counts);
+	printf("Memory freed\n");
 
     // count the number of successes of these values
     int bounded_points = 0;
