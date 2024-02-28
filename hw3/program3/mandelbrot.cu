@@ -23,7 +23,7 @@ __global__ void mandelbrot(int *iter_out, int numx, int numy) {
     float y = 0.0f;
     float xtemp;
     int iteration = 0;
-    while (((x*x + y*y) <= 4.0f) && (iteration < max_iterations)) {
+    while (((x*x + y*y) <= 4.0f) && (iteration < MAX_ITER)) {
         xtemp = (x*x) - (y*y) + x0;
         y = (2*x*y) + y0;
         x = xtemp;
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     ///
 
     // setup cuda
-    int BLOCKS = (size + THREADS - 1);
+    int BLOCKS = ((numx * numy) + THREADS - 1);
     int *iter_out, *iter_out_d;
     iter_out = (int *)malloc(numx * numy * sizeof(int));
     cudaMalloc(iter_out_d, numx * numy * sizeof(int));

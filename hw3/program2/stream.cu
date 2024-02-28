@@ -46,7 +46,7 @@ __global__ void initalize_double_array(int size, double *array, double value) {
 __global__ void copy_benchmark (int size, float *a, float *c) {
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
     if (idx < size)
-        c[idx] = a;
+        c[idx] = a[idx];
 }
 
 // Multiply each element of C by a scalar, then put into B
