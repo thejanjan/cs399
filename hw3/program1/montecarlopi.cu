@@ -9,9 +9,6 @@
 const int THREADS = 16;
 
 __global__ void monte_carlo(int *point_counts) {
-    // shared memory for the threads in this block
-    __shared__ int successes[THREADS];
-
     // some consts for this function
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -22,19 +19,30 @@ __global__ void monte_carlo(int *point_counts) {
     // calculate success for this thread
     float x = curand_uniform(&state);
     float y = curand_uniform(&state);
-    successes[threadIdx.x] = 0;
+    point_counts[idx] = 0;
     if (((x * x) + (y * y)) < 1.0)
-        successes[threadIdx.x] = 1;
+        point_counts[idx] = 1;
+}
 
-    // sync threads
-    __syncthreads();
-
-    // let one thread populate the point count for the block
-    if (threadIdx.x == 0) {
-        point_counts[blockIdx.x] = 0;
-        for (int i = 0; i < THREADS; i++)
-            point_counts[blockIdx.x] += successes[i];
-    }
+__global__ void reduce(int *gdata, int *out, int N) {
+	// grid-strided reduction code from lecture 5
+	__shared__ float sdata[THREADS];
+	int tid = threadIdx.x;
+	sdata[tid] = 0;
+	int idx = threadIdx.x + blockDim.x * blockIdx.x;
+	while (idx < N) {
+		sdata[tid] += gdata[idx];
+		idx += gridDim.x*blockDim.x;
+	}
+	for (unsigned int s=blockDim.x/2;s>0;s>>=1) {
+		__syncthreads();
+		if (tid < s) {
+			sdata[tid] += sdata[tid + s];
+		}
+	}
+	if (tid == 0) {
+		atomicAdd(out, sdata[0]);
+	}
 }
 
 int main(int argc, char *argv[]) {
@@ -56,31 +64,32 @@ int main(int argc, char *argv[]) {
     int BLOCKS = (num_points + THREADS - 1);
 
     int *point_counts, *d_point_counts;
+	int *out, *d_out;
     point_counts = (int *)malloc(num_points * sizeof(int));
+	out = (int *)malloc(sizeof(int));
     cudaMalloc(&d_point_counts, num_points * sizeof(int));
+	cudaMalloc(&d_out, sizeof(int));
 	printf("Memory allocated\n");
 
     // perform kernel
     monte_carlo<<<BLOCKS, THREADS>>>(d_point_counts);
+	reduce<<<BLOCKS, THREADS>>>(d_point_counts, d_out, num_points);
 	printf("Kernel performed\n");
 
     // collect result
-    cudaMemcpy(point_counts, d_point_counts, sizeof(int) * num_points, cudaMemcpyDeviceToHost);
+    cudaMemcpy(out, d_out, sizeof(int), cudaMemcpyDeviceToHost);
     cudaFree(d_point_counts);
+	cudaFree(d_out);
 	printf("Memory freed\n");
 
-    // count the number of successes of these values
-    int bounded_points = 0;
-    for (int i = 0; i < BLOCKS; i++)
-        bounded_points += point_counts[i];
-
     // calculate pi, display results
-    float pi_approx = 4.0f * ((float)bounded_points / (float)num_points);
+    float pi_approx = 4.0f * ((float)out / (float)num_points);
     printf("Number of points: %d\n", num_points);
-    printf("Points within quarter circle: %d\n", bounded_points);
+    printf("Points within quarter circle: %d\n", out);
     printf("Pi approximate: %f\n", pi_approx);
 
     // cleanup and return
     free(point_counts);
+	free(out);
     return 0;
 }
