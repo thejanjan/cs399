@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
     }
 
     // get constants
-    int BLOCKS = (size + THREADS - 1);
+    int BLOCKS = ceil((float)size/(float)THREADS);
     float scalar = 2.0f;
 
     // setup device memory

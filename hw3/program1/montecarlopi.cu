@@ -8,32 +8,25 @@
 
 const int THREADS = 16;
 
-__global__ void monte_carlo(int *point_counts) {
-    // some consts for this function
-    int idx = threadIdx.x + blockIdx.x * blockDim.x;
-
-    // setup cuRAND
-    curandState state;
-    curand_init((unsigned long long)clock(), idx, 0, &state);
-
-    // calculate success for this thread
-    float x = curand_uniform(&state);
-    float y = curand_uniform(&state);
-    point_counts[idx] = 0;
-    if (((x * x) + (y * y)) < 1.0)
-        point_counts[idx] = 1;
-}
-
-__global__ void reduce(int *gdata, int *out, int N) {
-	// grid-strided reduction code from lecture 5
-	__shared__ float sdata[THREADS];
+__global__ void monte_carlo(int *out, int N) {
+	// shared state for this block
+	__shared__ int sdata[THREADS];
 	int tid = threadIdx.x;
-	sdata[tid] = 0;
-	int idx = threadIdx.x + blockDim.x * blockIdx.x;
-	while (idx < N) {
-		sdata[tid] += gdata[idx];
-		idx += gridDim.x*blockDim.x;
+	int idx = threadIdx.x + blockIdx.x * blockDim.x;
+
+    // perform monte carlo calculation on this thread
+	if (idx < N) {
+		// setup cuRAND
+		curandState state;
+		curand_init((unsigned long long)clock(), idx, 0, &state);
+
+		// calculate success for this thread
+		float x = curand_uniform(&state);
+		float y = curand_uniform(&state);
+		sdata[tid] = (int)(((x * x) + (y * y)) < 1.0);
 	}
+	
+	// start performing reduction
 	for (unsigned int s=blockDim.x/2;s>0;s>>=1) {
 		__syncthreads();
 		if (tid < s) {
@@ -61,24 +54,18 @@ int main(int argc, char *argv[]) {
 	printf("Running with %d points\n", num_points);
 
     // allocate host and device memory
-    int BLOCKS = (num_points + THREADS - 1);
-
-    int *point_counts, *d_point_counts;
 	int *out, *d_out;
-    point_counts = (int *)malloc(num_points * sizeof(int));
 	out = (int *)malloc(sizeof(int));
-    cudaMalloc(&d_point_counts, num_points * sizeof(int));
 	cudaMalloc(&d_out, sizeof(int));
 	printf("Memory allocated\n");
 
     // perform kernel
-    monte_carlo<<<BLOCKS, THREADS>>>(d_point_counts);
-	reduce<<<BLOCKS, THREADS>>>(d_point_counts, d_out, num_points);
+	int BLOCKS = ceil((float)num_points / (float)THREADS);
+    monte_carlo<<<BLOCKS, THREADS>>>(d_out, num_points);
 	printf("Kernel performed\n");
 
     // collect result
     cudaMemcpy(out, d_out, sizeof(int), cudaMemcpyDeviceToHost);
-    cudaFree(d_point_counts);
 	cudaFree(d_out);
 	printf("Memory freed\n");
 
@@ -89,7 +76,6 @@ int main(int argc, char *argv[]) {
     printf("Pi approximate: %f\n", pi_approx);
 
     // cleanup and return
-    free(point_counts);
 	free(out);
     return 0;
 }
