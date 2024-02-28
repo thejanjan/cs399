@@ -51,23 +51,23 @@ int main(int argc, char *argv[]) {
     /// Monte Carlo algorithm
     ///
 	
-	printf("Running with %d points\n", num_points);
+	// printf("Running with %d points\n", num_points);
 
     // allocate host and device memory
 	int *out, *d_out;
 	out = (int *)malloc(sizeof(int));
 	cudaMalloc(&d_out, sizeof(int));
-	printf("Memory allocated\n");
+	// printf("Memory allocated\n");
 
     // perform kernel
 	int BLOCKS = ceil((float)num_points / (float)THREADS);
     monte_carlo<<<BLOCKS, THREADS>>>(d_out, num_points);
-	printf("Kernel performed\n");
+	// printf("Kernel performed\n");
 
     // collect result
     cudaMemcpy(out, d_out, sizeof(int), cudaMemcpyDeviceToHost);
 	cudaFree(d_out);
-	printf("Memory freed\n");
+	// printf("Memory freed\n");
 
     // calculate pi, display results
     float pi_approx = 4.0f * ((float)(*out) / (float)num_points);
