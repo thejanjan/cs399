@@ -6,10 +6,9 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
-const int THREADS = 256;
+const int THREADS = 16;
 
-__global__
-void monte_carlo(int *point_counts) {
+__global__ void monte_carlo(int *point_counts) {
     // shared memory for the threads in this block
     __shared__ int successes[THREADS];
 
@@ -18,7 +17,7 @@ void monte_carlo(int *point_counts) {
 
     // setup cuRAND
     curandState state;
-    curand_init(clock64(), idx, 0, &state);
+    curand_init((unsigned long long)clock(), idx, 0, &state);
 
     // calculate success for this thread
     float x = curand_uniform(&state);

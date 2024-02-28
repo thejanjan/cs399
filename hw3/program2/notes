@@ -1,3 +1,5 @@
 load modules, run make, and then submit the sbatch.
 
 the job is configured for one minute and a size of 100,000, but could also be turned up again
+
+the time it takes to initialize an array of doubles is almost a magnitude faster than with an array of floats, which is quite surprising to me. this is likely because CUDA uses dark magic during memory allocation

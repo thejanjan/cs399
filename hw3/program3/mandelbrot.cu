@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
     int BLOCKS = ((numx * numy) + THREADS - 1);
     int *iter_out, *iter_out_d;
     iter_out = (int *)malloc(numx * numy * sizeof(int));
-    cudaMalloc(iter_out_d, numx * numy * sizeof(int));
+    cudaMalloc(&iter_out_d, numx * numy * sizeof(int));
 
     // perform kernel
     mandelbrot<<<BLOCKS, THREADS>>>(iter_out_d, numx, numy);
