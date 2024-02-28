@@ -83,9 +83,9 @@ int main(int argc, char *argv[]) {
 	printf("Memory freed\n");
 
     // calculate pi, display results
-    float pi_approx = 4.0f * ((float)out / (float)num_points);
+    float pi_approx = 4.0f * ((float)(*out) / (float)num_points);
     printf("Number of points: %d\n", num_points);
-    printf("Points within quarter circle: %d\n", out);
+    printf("Points within quarter circle: %d\n", *out);
     printf("Pi approximate: %f\n", pi_approx);
 
     // cleanup and return
