@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cuda.h>
+#include <cuda_runtime.h>
 
 const int THREADS = 32;
 const int MAX_ITER = 1000;
