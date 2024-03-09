@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 	dim3 threads_per_block(THREADS, THREADS);
 	dim3 blocks_per_grid(ceil((float)n/(float)THREADS), ceil((float)n/(float)THREADS));
 	
-    float *a_d, *b_d, *err_d, *out, *err;
+    float *a_d, *b_d, *err_d;
     float *out = (float *)malloc(n * n * sizeof(float));
 	float *err = (float *)malloc(n * n * sizeof(float));
     cudaMalloc(&a_d, n * n * sizeof(float));
@@ -80,12 +80,12 @@ int main(int argc, char *argv[]) {
 	heat_init<<<blocks_per_grid, threads_per_block>>>(b_d, n, initial_val);
 	
 	// now begin the heat loop, loop over each iteration
-	for (int iter = 1; iter <= max_iter; iter++) {
+	for (int i = 1; i <= max_iter; i++) {
 		// perform iteration step
 		heat_iteration<<<blocks_per_grid, threads_per_block>>>(a_d, b_d, n, err_d);
 
 		// attempt printing to new csv
-		if ((iter % 1000) == 0) {
+		if ((i % 1000) == 0) {
 			// get data from gpu
 			cudaMemcpy(out, b_d, sizeof(float) * n * n, cudaMemcpyDeviceToHost);
 
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 				printf("Error when allocating filename");
 				continue;
 			}
-			snprintf(fname, 20, "heat_%d.csv", iter);
+			snprintf(fname, 20, "heat_%d.csv", i);
 			FILE *fp = fopen(fname, "w");
 			if (fp == NULL) {
 				free(fname);

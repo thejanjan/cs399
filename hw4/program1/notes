@@ -1,3 +1,6 @@
 load modules, run make, and then submit the sbatch.
 
-TODO - run Nsight Compute
+I attempted running nsight compute but ran into some unusual issues with the nodes.
+namely, running the programs on an interactive node would throw cuda error 100 (no cuda-capable device is detected).
+this happened when testing interactive jobs on the gpu and preempt nodes, even though the error isn't thrown when the sbatch runs on preempt?
+so unfortunately I will not be able to deliver any performance insight here
