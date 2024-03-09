@@ -153,10 +153,15 @@ int main(int argc, char *argv[]) {
 
 	// check results (sorry doc... not doing this with cuda because i'm a REBELLIOUS TEEN!!!)
 	cudaMemcpy(c, c_d, sizeof(float) * n * n, cudaMemcpyDeviceToHost);
+	int fails = 0;
 	for (int i = 0; i < (n * n); i++) {
 		if (c[i] != m) {
-			printf("Verify error at %d, val is %f\n", i, c[i]);
+			printf("Verify error at %d, val is %f (should be %d)\n", i, c[i], m);
+			fails++;
 		}
+	}
+	if (fails > 0) {
+		printf("Verify misses: %d\n", fails);
 	}
 
 	// transpose B, benchmark
