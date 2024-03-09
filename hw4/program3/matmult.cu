@@ -49,7 +49,7 @@ __global__ void matrix_init(float *a, float *a2, float *b, float *b2, float *c, 
 	}
 	
 	if (xi == 0 && yi == 0) {
-		fails = 0;
+		*fails = 0;
 	}
 }
 
@@ -149,7 +149,8 @@ int main(int argc, char *argv[]) {
 	// setup cuda
 	int max_dim = max(n, m);
 	dim3 threads_per_block(THREADS, THREADS);
-	dim3 blocks_per_grid(ceil((float)max_dim/(float)THREADS), ceil((float)max_dim/(float)THREADS));
+	dim3 blocks_per_grid_max(ceil((float)max_dim/(float)THREADS), ceil((float)max_dim/(float)THREADS));
+	dim3 blocks_per_grid_nn(ceil((float)n/(float)THREADS), ceil((float)n/(float)THREADS));
 
 	float *a_d, *a2_d, *b_d, *b2_d, *c_d, *c;
 	c = (float *)malloc(n * n * sizeof(float));
@@ -164,15 +165,15 @@ int main(int argc, char *argv[]) {
 	cudaMalloc(&fails_d, sizeof(int));
 
 	// init matrices
-	matrix_init<<<blocks_per_grid, threads_per_block>>>(a_d, a2_d, b_d, b2_d, c_d, m, n, 1.0f, fails_d);
+	matrix_init<<<blocks_per_grid_max, threads_per_block>>>(a_d, a2_d, b_d, b2_d, c_d, m, n, 1.0f, fails_d);
 
 	// do initial computation, benchmark
 	start_benchmark();
-	matrix_mult<<<blocks_per_grid, threads_per_block>>>(a_d, b_d, c_d, m, n);
+	matrix_mult<<<blocks_per_grid_nn, threads_per_block>>>(a_d, b_d, c_d, m, n);
 	end_benchmark("A*B");
 
 	// check results
-	matrix_test<<<blocks_per_grid, threads_per_block>>>(c, m, n, fails_d);
+	matrix_test<<<blocks_per_grid_nn, threads_per_block>>>(c, m, n, fails_d);
 	cudaMemcpy(fails, fails_d, sizeof(int), cudaMemcpyDeviceToHost);
 	if (fails > 0) {
 		printf("Verify misses: %d\n", fails);
@@ -191,12 +192,12 @@ int main(int argc, char *argv[]) {
 
 	// transpose B, benchmark
 	start_benchmark();
-	matrix_mult_b2<<<blocks_per_grid, threads_per_block>>>(a_d, b2_d, c_d, m, n);
+	matrix_mult_b2<<<blocks_per_grid_nn, threads_per_block>>>(a_d, b2_d, c_d, m, n);
 	end_benchmark("A*B, transposed B");
 
 	// transpose A, benchmark
 	start_benchmark();
-	matrix_mult_a2<<<blocks_per_grid, threads_per_block>>>(a2_d, b_d, c_d, m, n);
+	matrix_mult_a2<<<blocks_per_grid_nn, threads_per_block>>>(a2_d, b_d, c_d, m, n);
 	end_benchmark("A*B, transposed A");
 
 	// return and cleanup
