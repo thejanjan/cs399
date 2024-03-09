@@ -54,10 +54,13 @@ __global__ void matrix_mult(float *A, float *B, float *C, int m, int n) {
 
 	if (xi < n && yi < n) {
 		// perform sum
+		// n=50, m=20
+		// i=1000 (xi = 20, yi = 0)
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
-			int ai = k + (xi * n);  // A[i][k]
-			int bi = yi + (k * n);  // B[k][j]
+			// k going from 0 to 20
+			int ai = k + (xi * m);  // A[i][k], ai = 1000->1019 steps of 1
+			int bi = yi + (k * n);  // B[k][j], bi = 0->950 steps of 50
 			result += A[ai] * B[bi];
 		}
 
@@ -77,9 +80,8 @@ __global__ void matrix_mult_b2(float *A, float *B2, float *C, int m, int n) {
 		// perform sum
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
-			int ai = k + (xi * n);
-			int bi = k + (xi * n);
-			result += A[ai] * B2[bi];
+			int ai = k + (xi * m);
+			result += A[ai] * B2[ai];
 		}
 
 		// set output
@@ -98,9 +100,8 @@ __global__ void matrix_mult_a2(float *A2, float *B, float *C, int m, int n) {
 		// perform sum
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
-			int ai = yi + (k * n);
 			int bi = yi + (k * n);
-			result += A2[ai] * B[bi];
+			result += A2[bi] * B[bi];
 		}
 
 		// set output
