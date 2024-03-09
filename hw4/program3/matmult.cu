@@ -52,7 +52,7 @@ __global__ void matrix_mult(float *A, float *B, float *C, int m, int n) {
 	
 	int i = yi + (xi * n);
 
-	if (i < (n * m)) {
+	if (i < (n * n)) {
 		// perform sum
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
@@ -73,7 +73,7 @@ __global__ void matrix_mult_b2(float *A, float *B2, float *C, int m, int n) {
 
 	int i = yi + (xi * n);
 
-	if (i < (n * m)) {
+	if (i < (n * n)) {
 		// perform sum
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
@@ -94,7 +94,7 @@ __global__ void matrix_mult_a2(float *A2, float *B, float *C, int m, int n) {
 
 	int i = yi + (xi * n);
 
-	if (i < (n * m)) {
+	if (i < (n * n)) {
 		// perform sum
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
