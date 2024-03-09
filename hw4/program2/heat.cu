@@ -73,6 +73,7 @@ int main(int argc, char *argv[]) {
     ///
 
     // setup cuda
+	printf("1\n");
 	dim3 threads_per_block(THREADS, THREADS);
 	dim3 blocks_per_grid(ceil((float)n/(float)THREADS), ceil((float)n/(float)THREADS));
 	
@@ -85,10 +86,12 @@ int main(int argc, char *argv[]) {
 	cudaMalloc(&b_d, n * n * sizeof(float));
 	cudaMalloc(&err_d, n * n * sizeof(float));
 	checkForCudaError();
+	printf("2\n");
 
 	// setup the heat arrays
 	heat_init<<<blocks_per_grid, threads_per_block>>>(a_d, n);
 	heat_init<<<blocks_per_grid, threads_per_block>>>(b_d, n);
+	printf("3\n");
 	
 	// now begin the heat loop, loop over each iteration
 	for (int iter = 1; iter <= max_iter; iter++) {
@@ -98,6 +101,7 @@ int main(int argc, char *argv[]) {
 
 		// attempt printing to new csv
 		if ((iter % 1000) == 0) {
+			printf("4\n");
 			// get data from gpu
 			cudaMemcpy(out, b_d, sizeof(float) * n * n, cudaMemcpyDeviceToHost);
 
@@ -124,6 +128,7 @@ int main(int argc, char *argv[]) {
 			}
 			fclose(fp);
 			free(fname);
+			printf("5\n");
 		}
 
 		// check that heat is within tolerance
@@ -143,6 +148,7 @@ int main(int argc, char *argv[]) {
 		a_d = b_d;
 		b_d = temp;
 	}
+	printf("6\n");
 	
 	// free memory
     cudaFree(a_d);
