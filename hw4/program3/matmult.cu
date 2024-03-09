@@ -35,13 +35,13 @@ __global__ void matrix_init(float *a, float *a2, float *b, float *b2, float *c, 
 	
 	if (i < (n * n)) {
 		c[i] = value;
-		
-		if (i < (n * m)) {
-			a[i] = value;
-			b2[i] = value;
-			a2[i] = value;
-			b[i] = value;
-		}
+	}
+	
+	if (i < (n * m)) {
+		a[i] = value;
+		b2[i] = value;
+		a2[i] = value;
+		b[i] = value;
 	}
 }
 
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
 	matrix_mult<<<blocks_per_grid, threads_per_block>>>(a_d, b_d, c_d, m, n);
 	end_benchmark("A*B");
 
-	// check results (sorry doc... not doing this with cuda because i'm a REBELLIOUS TEEN!!!)
+	// check results
 	cudaMemcpy(c, c_d, sizeof(float) * n * n, cudaMemcpyDeviceToHost);
 	int fails = 0;
 	for (int i = 0; i < (n * n); i++) {
