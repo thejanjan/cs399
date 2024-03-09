@@ -163,6 +163,8 @@ int main(int argc, char *argv[]) {
 	int *fails = (int *)malloc(sizeof(int));
 	int *fails_d;
 	cudaMalloc(&fails_d, sizeof(int));
+	*fails = 0;
+	cudaMemcpy(fails_d, fails, sizeof(int), cudaMemcpyHostToDevice);
 	matrix_test<<<blocks_per_grid, threads_per_block>>>(c, m, n, fails_d);
 	cudaMemcpy(fails, fails_d, sizeof(int), cudaMemcpyDeviceToHost);
 	if (fails > 0) {
