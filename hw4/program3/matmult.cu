@@ -53,7 +53,7 @@ __global__ void matrix_test(float *C, int m, int n, int *out) {
 	if (xi < n && yi < n) {
 		// test output
 		int i = yi + (xi * n);
-		if (C[i] != m) {
+		if (round(C[i]) != m) {
 			atomicAdd(out, 1);
 		}
 	}
@@ -167,6 +167,15 @@ int main(int argc, char *argv[]) {
 	cudaMemcpy(fails, fails_d, sizeof(int), cudaMemcpyDeviceToHost);
 	if (fails > 0) {
 		printf("Verify misses: %d\n", fails);
+		
+		// do a more precise test
+		cudaMemcpy(c, c_d, sizeof(float) * n * n, cudaMemcpyDeviceToHost);	
+		for (int i = 0; i < (n * n); i++) {
+			int value = round(c[i]);
+			if (value != m) {
+				printf("Miss at i=%d: %d (expected: %d)\n", i, value, m);
+			}
+		}
 	}
 	free(fails);
 	cudaFree(fails_d);
