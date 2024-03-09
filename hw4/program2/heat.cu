@@ -6,20 +6,6 @@
 
 const int THREADS = 32;
 
-__global__ void heat_init(float *a, int n, float value) {
-    // calculate the x and y index the thread is working on
-	int xi = threadIdx.x + blockIdx.x*blockDim.x;
-	int yi = threadIdx.y + blockIdx.y*blockDim.y;
-	
-	if (xi < n && yi < n) {
-		// get index
-		int i = xi + (yi * n);
-		
-		// initialize array
-		a[i] = value;
-	}
-}
-
 __global__ void heat_iteration(float *a, float *b, int n, float *err) {
     // calculate the x and y index the thread is working on
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
@@ -68,6 +54,8 @@ int main(int argc, char *argv[]) {
 	dim3 threads_per_block(THREADS, THREADS);
 	dim3 blocks_per_grid(ceil((float)n/(float)THREADS), ceil((float)n/(float)THREADS));
 	
+	// using A and B instead of A and Anew,
+	// since I'm swapping their pointers for efficiency
     float *a_d, *b_d, *err_d;
     float *out = (float *)malloc(n * n * sizeof(float));
 	float *err = (float *)malloc(n * n * sizeof(float));
@@ -76,8 +64,15 @@ int main(int argc, char *argv[]) {
 	cudaMalloc(&err_d, n * n * sizeof(float));
 
 	// setup the heat arrays
-	heat_init<<<blocks_per_grid, threads_per_block>>>(a_d, n, initial_val);
-	heat_init<<<blocks_per_grid, threads_per_block>>>(b_d, n, initial_val);
+	float *ref = (float *)malloc(n * n * sizeof(float));
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			ref[(i * n) + j] = (i == 0) ? 100.0f : 0.0f;
+		}
+	}
+	cudaMemcpy(a_d, ref, sizeof(float) * n * n, cudaMemcpyHostToDevice);
+	cudaMemcpy(b_d, ref, sizeof(float) * n * n, cudaMemcpyHostToDevice);
+	free(ref);
 	
 	// now begin the heat loop, loop over each iteration
 	for (int iter = 1; iter <= max_iter; iter++) {
