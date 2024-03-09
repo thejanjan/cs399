@@ -35,12 +35,26 @@ __global__ void matrix_init(float *a, float *a2, float *b, float *b2, float *c, 
 	
 	if (i < (n * n)) {
 		c[i] = value;
-		
-		if (i < (n * m)) {
-			a[i] = value;
-			b2[i] = value;
-			a2[i] = value;
-			b[i] = value;
+	}
+	
+	if (i < (n * m)) {
+		a[i] = value;
+		b2[i] = value;
+		a2[i] = value;
+		b[i] = value;
+	}
+}
+
+__global__ void matrix_test(float *C, int m, int n, int *out) {
+	// calculate the x and y index the thread is working on
+	int xi = threadIdx.x + blockIdx.x*blockDim.x;
+	int yi = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if (xi < n && yi < n) {
+		// test output
+		int i = yi + (xi * n);
+		if (C[i] != m) {
+			atomicAdd(out, 1);
 		}
 	}
 }
@@ -49,22 +63,17 @@ __global__ void matrix_mult(float *A, float *B, float *C, int m, int n) {
 	// calculate the x and y index the thread is working on
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
 	int yi = threadIdx.y + blockIdx.y*blockDim.y;
-	
-	int i = yi + (xi * n);
 
 	if (xi < n && yi < n) {
-		// perform sum
-		// n=50, m=20
-		// i=1000 (xi = 20, yi = 0)
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
-			// k going from 0 to 20
-			int ai = k + (xi * m);  // A[i][k], ai = 1000->1019 steps of 1
-			int bi = yi + (k * n);  // B[k][j], bi = 0->950 steps of 50
+			int ai = k + (xi * m);
+			int bi = yi + (k * n);
 			result += A[ai] * B[bi];
 		}
 
 		// set output
+		int i = yi + (xi * n);
 		C[i] = result;
 	}
 }
@@ -73,8 +82,6 @@ __global__ void matrix_mult_b2(float *A, float *B2, float *C, int m, int n) {
 	// calculate the x and y index the thread is working on
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
 	int yi = threadIdx.y + blockIdx.y*blockDim.y;
-
-	int i = yi + (xi * n);
 
 	if (xi < n && yi < n) {
 		// perform sum
@@ -85,6 +92,7 @@ __global__ void matrix_mult_b2(float *A, float *B2, float *C, int m, int n) {
 		}
 
 		// set output
+		int i = yi + (xi * n);
 		C[i] = result;
 	}
 }
@@ -93,8 +101,6 @@ __global__ void matrix_mult_a2(float *A2, float *B, float *C, int m, int n) {
 	// calculate the x and y index the thread is working on
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
 	int yi = threadIdx.y + blockIdx.y*blockDim.y;
-
-	int i = yi + (xi * n);
 
 	if (xi < n && yi < n) {
 		// perform sum
@@ -105,6 +111,7 @@ __global__ void matrix_mult_a2(float *A2, float *B, float *C, int m, int n) {
 		}
 
 		// set output
+		int i = yi + (xi * n);
 		C[i] = result;
 	}
 }
@@ -152,18 +159,17 @@ int main(int argc, char *argv[]) {
 	matrix_mult<<<blocks_per_grid, threads_per_block>>>(a_d, b_d, c_d, m, n);
 	end_benchmark("A*B");
 
-	// check results (sorry doc... not doing this with cuda because i'm a REBELLIOUS TEEN!!!)
-	cudaMemcpy(c, c_d, sizeof(float) * n * n, cudaMemcpyDeviceToHost);
-	int fails = 0;
-	for (int i = 0; i < (n * n); i++) {
-		if (c[i] != m) {
-			printf("Verify error at %d, val is %f (should be %d)\n", i, c[i], m);
-			fails++;
-		}
-	}
+	// check results
+	int *fails = (int *)malloc(sizeof(int));
+	int *fails_d;
+	cudaMalloc(&fails_d, sizeof(int));
+	matrix_test<<<blocks_per_grid, threads_per_block>>>(c, m, n, fails_d);
+	cudaMemcpy(fails, fails_d, sizeof(int), cudaMemcpyDeviceToHost);
 	if (fails > 0) {
 		printf("Verify misses: %d\n", fails);
 	}
+	free(fails);
+	cudaFree(fails_d);
 
 	// transpose B, benchmark
 	start_benchmark();
