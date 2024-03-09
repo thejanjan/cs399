@@ -35,14 +35,14 @@ __global__ void axpy(float *x, float *y, int n, float a) {
 	}
 }
 
-void verify_results(float *out, int n, float a) {
+void verify_results(float *y, int n, float a) {
 	bool success = true;
 	float output_val = a * 1.0f + 2.0f;  // a*x+y
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
-			if (out[j + (i * n)] != output_val) {
+			if (y[j + (i * n)] != output_val) {
 				printf("Verify Failure - at y[%d]\n", j + (i * n));
-				printf("%f != %f\n", out[j + (i * n)], output_val);
+				printf("%f != %f\n", y[j + (i * n)], output_val);
 				success = false;
 			}
 		}
@@ -82,6 +82,12 @@ int main(int argc, char *argv[]) {
 
 	// collect result
 	cudaMemcpy(y, y_d, sizeof(float) * n * n, cudaMemcpyDeviceToHost);
+	cudaError_t errorCode = cudaGetLastError();
+	if (errorCode != cudaSuccess)
+	{
+		printf("Cuda error %d: %s\n", errorCode, cudaGetErrorString(errorCode));
+		exit(0);
+	}
 	cudaFree(x_d);
 	cudaFree(y_d);
 
