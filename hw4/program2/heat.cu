@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
 			measured_err = max(err[i], measured_err);
 		}
 		if (measured_err <= tol) {
-			printf("Tolerance reached at iteration %d\n", iter);
+			printf("Tolerance reached at iteration %d\n", i);
 			break;
 		}
 		
