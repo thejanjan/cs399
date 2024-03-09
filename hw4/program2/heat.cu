@@ -25,7 +25,7 @@ __global__ void heat_iteration(float *a, float *b, int n, float *err) {
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
 	int yi = threadIdx.y + blockIdx.y*blockDim.y;
 	
-	if (xi > 1 && yi > 1 && xi < (n - 1) && yi < (n - 1)) {
+	if (xi > 0 && yi > 0 && xi < (n - 1) && yi < (n - 1)) {
 		// get index
 		int i = xi + (yi * n);
 		int left = xi - 1 + (yi * n);
