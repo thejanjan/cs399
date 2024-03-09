@@ -31,19 +31,15 @@ __global__ void matrix_init(float *a, float *a2, float *b, float *b2, float *c, 
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
 	int yi = threadIdx.y + blockIdx.y*blockDim.y;
 	
-	if (xi < n && yi < n) {
-		int i = xi + (yi * n);
+	int i = xi + (yi * n);
+	
+	if (i < (n * n)) {
 		c[i] = value;
 	}
 	
-	if (xi < m && yi < n) {
-		int i = xi + (yi * m);
+	if (i < (n * m)) {
 		a[i] = value;
 		b2[i] = value;
-	}
-	
-	if (xi < n && yi < m) {
-		int i = xi + (yi * n);
 		b[i] = value;
 		a2[i] = value;
 	}
