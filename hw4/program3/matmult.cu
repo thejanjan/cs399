@@ -49,11 +49,10 @@ __global__ void matrix_mult(float *A, float *B, float *C, int m, int n) {
 	// calculate the x and y index the thread is working on
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
 	int yi = threadIdx.y + blockIdx.y*blockDim.y;
+	
+	int i = yi + (xi * n);
 
-	if (xi < m && yi < n) {
-		// get index
-		int i = yi + (xi * n);
-
+	if (i < (n * m)) {
 		// perform sum
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
@@ -72,10 +71,9 @@ __global__ void matrix_mult_b2(float *A, float *B2, float *C, int m, int n) {
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
 	int yi = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if (xi < m && yi < n) {
-		// get index
-		int i = yi + (xi * n);
+	int i = yi + (xi * n);
 
+	if (i < (n * m)) {
 		// perform sum
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
@@ -94,10 +92,9 @@ __global__ void matrix_mult_a2(float *A2, float *B, float *C, int m, int n) {
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
 	int yi = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if (xi < m && yi < n) {
-		// get index
-		int i = yi + (xi * n);
+	int i = yi + (xi * n);
 
+	if (i < (n * m)) {
 		// perform sum
 		float result = 0.0f;
 		for (int k = 0; k < m; k++) {
