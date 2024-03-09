@@ -108,7 +108,6 @@ int main(int argc, char *argv[]) {
 
 			FILE *fp = fopen(fname, "w");
 			if (fp == NULL) {
-				free(fname);
 				printf("Error when creating csv");
 				continue;
 			}
@@ -121,7 +120,6 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			fclose(fp);
-			free(fname);
 		}
 
 		// check that heat is within tolerance
