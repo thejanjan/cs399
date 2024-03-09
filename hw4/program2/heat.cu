@@ -80,12 +80,12 @@ int main(int argc, char *argv[]) {
 	heat_init<<<blocks_per_grid, threads_per_block>>>(b_d, n, initial_val);
 	
 	// now begin the heat loop, loop over each iteration
-	for (int iter = 1; iter <= max_iter; iter++) {
+	for (int iteration = 1; iteration <= max_iter; iteration++) {
 		// perform iteration step
 		heat_iteration<<<blocks_per_grid, threads_per_block>>>(a_d, b_d, n, err_d);
 
 		// attempt printing to new csv
-		if ((iter % 1000) == 0) {
+		if ((iteration % 1000) == 0) {
 			// get data from gpu
 			cudaMemcpy(out, b_d, sizeof(float) * n * n, cudaMemcpyDeviceToHost);
 
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 				printf("Error when allocating filename");
 				continue;
 			}
-			snprintf(fname, 20, "heat_%d.csv", iter);
+			snprintf(fname, 20, "heat_%d.csv", iteration);
 			FILE *fp = fopen(fname, "w");
 			if (fp == NULL) {
 				free(fname);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 			for (int y = 0; y < n; y++){
 				for (int x = 0; x < n; x++){
 					fprintf(fp, "%f%s",
-						out[x + (iter * n)],       // write number
+						out[x + (iteration * n)],       // write number
 						((x + 1) == n) ? "\n" : ","  // add comma, unless end of line
 					);
 				}
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
 			measured_err = max(err[i], measured_err);
 		}
 		if (measured_err <= tol) {
-			printf("Tolerance reached at iteration %d\n", iter);
+			printf("Tolerance reached at iteration %d\n", iteration);
 			break;
 		}
 		
