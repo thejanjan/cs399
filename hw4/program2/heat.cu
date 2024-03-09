@@ -27,12 +27,20 @@ __global__ void heat_iteration(float *a, float *b, int n, float *err) {
 	}
 }
 
+void checkForCudaError() {
+	cudaError_t errorCode = cudaGetLastError();
+	if (errorCode != cudaSuccess)
+	{
+		printf("Cuda error %d: %s\n", errorCode, cudaGetErrorString(errorCode));
+		exit(0);
+	}
+}
+
 int main(int argc, char *argv[]) {
     // Handle option inputs -- really rough arg parsing
     int n = 256;
     float tol = 0.01f;
     int max_iter = 3000;
-	float initial_val = 100.0f;
 
     if (argc == 7) {
         if (strcmp(argv[1], "-n") == 0) {
@@ -62,6 +70,7 @@ int main(int argc, char *argv[]) {
     cudaMalloc(&a_d, n * n * sizeof(float));
 	cudaMalloc(&b_d, n * n * sizeof(float));
 	cudaMalloc(&err_d, n * n * sizeof(float));
+	checkForCudaError();
 
 	// setup the heat arrays
 	float *ref = (float *)malloc(n * n * sizeof(float));
@@ -72,12 +81,14 @@ int main(int argc, char *argv[]) {
 	}
 	cudaMemcpy(a_d, ref, sizeof(float) * n * n, cudaMemcpyHostToDevice);
 	cudaMemcpy(b_d, ref, sizeof(float) * n * n, cudaMemcpyHostToDevice);
+	checkForCudaError();
 	free(ref);
 	
 	// now begin the heat loop, loop over each iteration
 	for (int iter = 1; iter <= max_iter; iter++) {
 		// perform iteration step
 		heat_iteration<<<blocks_per_grid, threads_per_block>>>(a_d, b_d, n, err_d);
+		checkForCudaError();
 
 		// attempt printing to new csv
 		if ((iter % 1000) == 0) {
@@ -111,6 +122,7 @@ int main(int argc, char *argv[]) {
 
 		// check that heat is within tolerance
 		cudaMemcpy(err, err_d, sizeof(float) * n * n, cudaMemcpyDeviceToHost);
+		checkForCudaError();
 		float measured_err = 0.0;
 		for (int i = 0; i < (n * n); i++) {
 			measured_err = max(err[i], measured_err);
@@ -130,6 +142,7 @@ int main(int argc, char *argv[]) {
     cudaFree(a_d);
 	cudaFree(b_d);
 	cudaFree(err_d);
+	checkForCudaError();
     free(out);
 	free(err);
     return 0;
