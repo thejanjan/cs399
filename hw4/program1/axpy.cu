@@ -54,9 +54,9 @@ int main(int argc, char *argv[]) {
 
     // setup cuda
 	dim3 threads_per_block(THREADS, THREADS);
-	dim3 blocks_per_grid(ceil((float)numx/(float)THREADS), ceil((float)numy/(float)THREADS));
+	dim3 blocks_per_grid(ceil((float)n/(float)THREADS), ceil((float)n/(float)THREADS));
 	
-    float *x_d *y_d;
+    float *x_d, *y_d;
     float *x = (float *)malloc(n * n * sizeof(float));
 	float *y = (float *)malloc(n * n * sizeof(float));
     cudaMalloc(&x_d, n * n * sizeof(float));
