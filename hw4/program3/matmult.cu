@@ -27,21 +27,29 @@ void end_benchmark(char *name) {
 /// kernels
 ///
 
-__global__ void matrix_init(float *a, float *a2, float *b, float *b2, float *c, int m, int n, float value) {
+__global__ void matrix_init(float *a, float *a2, float *b, float *b2, float *c, int m, int n, float value, int *fails) {
 	int xi = threadIdx.x + blockIdx.x*blockDim.x;
 	int yi = threadIdx.y + blockIdx.y*blockDim.y;
 	
-	int i = xi + (yi * n);
-	
-	if (i < (n * n)) {
+	if (xi < n && yi < n) {
+		int i = xi + (yi * n);
 		c[i] = value;
 	}
 	
-	if (i < (n * m)) {
+	if (xi < m && yi < n) {
+		int i = xi + (yi * m);
 		a[i] = value;
 		b2[i] = value;
-		a2[i] = value;
+	}
+	
+	if (xi < n && yi < m) {
+		int i = xi + (yi * n);
 		b[i] = value;
+		a2[i] = value;
+	}
+	
+	if (xi == 0 && yi == 0) {
+		fails = 0;
 	}
 }
 
@@ -150,9 +158,13 @@ int main(int argc, char *argv[]) {
 	cudaMalloc(&b_d,  n * m * sizeof(float));
 	cudaMalloc(&b2_d, n * m * sizeof(float));
 	cudaMalloc(&c_d,  n * n * sizeof(float));
+	
+	int *fails_d, *fails;
+	fails = (int *)malloc(sizeof(int));
+	cudaMalloc(&fails_d, sizeof(int));
 
 	// init matrices
-	matrix_init<<<blocks_per_grid, threads_per_block>>>(a_d, a2_d, b_d, b2_d, c_d, m, n, 1.0f);
+	matrix_init<<<blocks_per_grid, threads_per_block>>>(a_d, a2_d, b_d, b2_d, c_d, m, n, 1.0f, fails_d);
 
 	// do initial computation, benchmark
 	start_benchmark();
@@ -160,11 +172,6 @@ int main(int argc, char *argv[]) {
 	end_benchmark("A*B");
 
 	// check results
-	int *fails = (int *)malloc(sizeof(int));
-	int *fails_d;
-	cudaMalloc(&fails_d, sizeof(int));
-	*fails = 0;
-	cudaMemcpy(fails_d, fails, sizeof(int), cudaMemcpyHostToDevice);
 	matrix_test<<<blocks_per_grid, threads_per_block>>>(c, m, n, fails_d);
 	cudaMemcpy(fails, fails_d, sizeof(int), cudaMemcpyDeviceToHost);
 	if (fails > 0) {
