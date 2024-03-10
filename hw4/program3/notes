@@ -1,3 +1,11 @@
 load modules, run make, and then submit the sbatch.
 
-TODO - write about performance
+i made attempts to verify the results on the GPU, but didn't have enough time or energy to figure out how to get the results back in a sane way (was running into a lot of weird issues with it, probably from tired)
+
+when testing a large matrix (10,000 x 10,000), my implementation seems to be the strongest with the non-transposed matrix, which is odd to me.
+
+a*b: 0.003994ms
+a*b, trans b: 0.053406ms (~13.37x longer)
+a*b, trans a: 0.007629ms (~1.91x longer)
+
+i feel like the performance difference is pretty unexpected, but it might have to do with how the thread blocks are organized and how they are competing for similar memory access amongst themselves. it might be setup in such a way that the caches aren't flailing when accessing from non-transposed matrices. but also the results are strange enough to me that my implementation could also just be incorrect, i'm unsure lol
