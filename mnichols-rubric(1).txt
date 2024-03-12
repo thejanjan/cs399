@@ -1,0 +1,24 @@
+Project Proposal
+------------------------------
+Model/language               |   1/1
+Problem description          |   1/1
+Why use a GPU?               |   1/1
+How will GPU be used?        |   1/1
+Evaluation                   |   1/1
+
+
+Total: 5/5
+
+
+Notes: This sounds like a great project idea! You seem to have 
+thought through all the possible problems you may run into, and 
+have a good backup plan, so that's most of my concerns handled. I 
+agree that OpenCL in Rust might be a lot to deal with all at once,
+though it should work for your use case. After some quick searching,
+I think either Rust-gpu or Rust-CUDA would work, though there would
+be trade-offs. If Rust doesn't work out though, there are CUDA 
+bindings for Python that you might be able to use? For the 
+evaluation, you might consider adding FPS or something similar. 
+While I agree that getting this working at all will be a challenge
+unto itself, it's worth considering a metric for how *well* it's
+working. I look forward to seeing your results!
