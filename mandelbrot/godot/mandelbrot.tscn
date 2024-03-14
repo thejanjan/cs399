@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3 uid="uid://fcdrqk1ltqde"]
+
+[ext_resource type="Script" path="res://game_texture.gd" id="1_177cm"]
+
+[sub_resource type="GDScript" id="GDScript_k85el"]
+resource_name = "TsetImage"
+script/source = "extends Node
+## Creates a test image.
+
+
+func create_image(width, height) -> Image:
+	var data = PackedByteArray()
+	for i in range(width * height * 3):
+		data.push_back(255)
+	var image = Image.create_from_data(300, 200, false, Image.FORMAT_RGB8, data)
+	return image
+"
+
+[node name="Mandelbrot" type="Node2D"]
+
+[node name="GameTexture" type="Sprite2D" parent="."]
+centered = false
+script = ExtResource("1_177cm")
+
+[node name="TestImageBuilder" type="Node" parent="."]
+script = SubResource("GDScript_k85el")
+
+[node name="MandelbrotImageBuilder" type="MandelbrotImageBuilder" parent="."]
