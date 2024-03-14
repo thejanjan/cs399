@@ -8,21 +8,21 @@ script/source = "extends Node
 ## Creates a test image.
 
 
-func create_image(width, height) -> Image:
+func create_image_data(width, height) -> PackedByteArray:
 	var data = PackedByteArray()
 	for i in range(width * height * 3):
 		data.push_back(255)
-	var image = Image.create_from_data(300, 200, false, Image.FORMAT_RGB8, data)
-	return image
+	return data
 "
 
 [node name="Mandelbrot" type="Node2D"]
 
 [node name="GameTexture" type="Sprite2D" parent="."]
-centered = false
 script = ExtResource("1_177cm")
 
 [node name="TestImageBuilder" type="Node" parent="."]
 script = SubResource("GDScript_k85el")
 
 [node name="MandelbrotImageBuilder" type="MandelbrotImageBuilder" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
