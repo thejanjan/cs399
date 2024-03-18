@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://fcdrqk1ltqde"]
+[gd_scene load_steps=18 format=3 uid="uid://fcdrqk1ltqde"]
 
 [ext_resource type="Script" path="res://mandelbrot_texture.gd" id="1_k0663"]
 [ext_resource type="Texture2D" uid="uid://bbthw5ctdne4a" path="res://icon.svg" id="1_wjjs4"]
@@ -6,6 +6,7 @@
 [ext_resource type="AudioStream" uid="uid://datdi57yr07n2" path="res://music.mp3" id="3_ujgab"]
 [ext_resource type="Script" path="res://player.gd" id="4_3smna"]
 [ext_resource type="AudioStream" uid="uid://b38a7sm184hg8" path="res://sfx/zoom_up.wav" id="4_6vl5i"]
+[ext_resource type="AudioStream" uid="uid://brhcrpa60m2we" path="res://sfx/jump.wav" id="5_3cqxh"]
 [ext_resource type="AudioStream" uid="uid://uxdsu6fxlapy" path="res://sfx/zoom_down.wav" id="5_bo4m7"]
 [ext_resource type="Script" path="res://zoom_manager.gd" id="6_8ihl0"]
 [ext_resource type="Texture2D" uid="uid://cijdeo3yhldvu" path="res://walker.png" id="7_iy167"]
@@ -121,8 +122,12 @@ visible = false
 top_level = true
 texture_filter = 5
 position = Vector2(-84, -176)
+rotation = -1.5708
 texture = ExtResource("7_iy167")
 script = ExtResource("4_3smna")
+
+[node name="JumpSfx" type="AudioStreamPlayer" parent="Player"]
+stream = ExtResource("5_3cqxh")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 

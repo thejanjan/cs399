@@ -212,12 +212,25 @@ fn compute_terrain(width: usize, height: usize, data_vec: Vec<u8>) -> ocl::Resul
                 int UP    = (Px       + ((Py - 1) * width)) * 3;
                 int DOWN  = (Px       + ((Py + 1) * width)) * 3;
 
-                // If we have two 0 neighbors, then set the terrain at this point to max uchar.
+                // If we have two or three 0 neighbors, then set the terrain at this point to max uchar.
                 // Note that we deliberately ensure that the minimum red is 1 so that
                 // we guarantee find 0s as max iteration terrain.
-                int NEIGHBORS = (data[LEFT] == 0) + (data[RIGHT] == 0) + (data[UP] == 0) + (data[DOWN] == 0);
-                if (NEIGHBORS == 2) {
-                    terrain[Px + (Py * width)] = 255;
+                int HAS_LEFT  = data[LEFT] == 0;
+                int HAS_RIGHT = data[RIGHT] == 0;
+                int HAS_UP    = data[UP] == 0;
+                int HAS_DOWN  = data[DOWN] == 0;
+                int NEIGHBORS = HAS_LEFT + HAS_RIGHT + HAS_UP + HAS_DOWN;
+                if (NEIGHBORS == 2 || NEIGHBORS == 3) {
+                    // Because there is a neighbor here, we'll calculate our normal in here.
+                    int HAS_UPRIGHT   = (data[((Px + 1) + ((Py + 1) * width)) * 3] == 0);
+                    int HAS_UPLEFT    = (data[((Px - 1) + ((Py + 1) * width)) * 3] == 0);
+                    int HAS_DOWNRIGHT = (data[((Px + 1) + ((Py - 1) * width)) * 3] == 0);
+                    int HAS_DOWNLEFT  = (data[((Px - 1) + ((Py - 1) * width)) * 3] == 0);
+                    terrain[Px + (Py * width)] =
+                        HAS_RIGHT + (HAS_UPRIGHT << 1)
+                        + (HAS_UP << 2) + (HAS_UPLEFT << 3)
+                        + (HAS_LEFT << 4) + (HAS_DOWNLEFT << 5)
+                        + (HAS_DOWN << 6) + (HAS_DOWNRIGHT << 7);
                 }
             }
         }
