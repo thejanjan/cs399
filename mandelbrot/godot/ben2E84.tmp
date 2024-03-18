@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://bsvl15j3lrijm"]
+
+[ext_resource type="Script" path="res://benchmark.gd" id="1_5487o"]
+
+[node name="Benchmark" type="Node"]
+script = ExtResource("1_5487o")
+
+[node name="MandelbrotImageBuilder" type="MandelbrotImageBuilder" parent="."]
+
+[node name="MandelbrotImage" type="Sprite2D" parent="."]
+texture_filter = 5
+
+[node name="TerrainImage" type="Sprite2D" parent="."]
+texture_filter = 5
+
+[node name="Camera2D" type="Camera2D" parent="."]

@@ -1,10 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://fcdrqk1ltqde"]
+[gd_scene load_steps=16 format=3 uid="uid://fcdrqk1ltqde"]
 
 [ext_resource type="Script" path="res://mandelbrot_texture.gd" id="1_k0663"]
 [ext_resource type="Texture2D" uid="uid://bbthw5ctdne4a" path="res://icon.svg" id="1_wjjs4"]
 [ext_resource type="AudioStream" uid="uid://dpejnbdu8t5mn" path="res://sfx/start.wav" id="3_mwgy0"]
 [ext_resource type="AudioStream" uid="uid://datdi57yr07n2" path="res://music.mp3" id="3_ujgab"]
-[ext_resource type="Script" path="res://player.gd" id="4_3smna"]
 [ext_resource type="AudioStream" uid="uid://b38a7sm184hg8" path="res://sfx/zoom_up.wav" id="4_6vl5i"]
 [ext_resource type="AudioStream" uid="uid://uxdsu6fxlapy" path="res://sfx/zoom_down.wav" id="5_bo4m7"]
 [ext_resource type="Script" path="res://zoom_manager.gd" id="6_8ihl0"]
@@ -66,8 +65,6 @@ RichTextLabel/font_sizes/normal_font_size = 64
 resource_name = "game_start"
 script/source = "extends RichTextLabel
 
-signal game_ready()
-
 @onready var mandelbrot_texture: Sprite2D = $\"../../MandelbrotTexture\"
 @onready var start_sfx: AudioStreamPlayer = $Start
 
@@ -91,7 +88,6 @@ func _process(delta: float) -> void:
 		
 		# Start SFX.
 		start_sfx.play()
-		game_ready.emit()
 "
 
 [node name="Game" type="Control"]
@@ -117,31 +113,10 @@ material = SubResource("ShaderMaterial_4shen")
 visible = false
 top_level = true
 texture_filter = 5
-position = Vector2(-84, -176)
+position = Vector2(-77, -177)
 texture = ExtResource("7_iy167")
-script = ExtResource("4_3smna")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-
-[node name="MandelbrotImageBuilder" type="MandelbrotImageBuilder" parent="."]
-
-[node name="ZoomManager" type="Node" parent="."]
-script = ExtResource("6_8ihl0")
-
-[node name="ZoomIn" type="AudioStreamPlayer" parent="ZoomManager"]
-stream = ExtResource("4_6vl5i")
-
-[node name="ZoomOut" type="AudioStreamPlayer" parent="ZoomManager"]
-stream = ExtResource("5_bo4m7")
-
-[node name="TerrainManager" type="Node" parent="."]
-script = ExtResource("8_t7x63")
-
-[node name="TerrainImage" type="Sprite2D" parent="TerrainManager"]
-visible = false
-top_level = true
-texture_filter = 5
-material = SubResource("ShaderMaterial_4shen")
 
 [node name="Interface" type="Control" parent="."]
 layout_mode = 1
@@ -182,6 +157,25 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
+
+[node name="MandelbrotImageBuilder" type="MandelbrotImageBuilder" parent="."]
+
+[node name="ZoomManager" type="Node" parent="."]
+script = ExtResource("6_8ihl0")
+
+[node name="ZoomIn" type="AudioStreamPlayer" parent="ZoomManager"]
+stream = ExtResource("4_6vl5i")
+
+[node name="ZoomOut" type="AudioStreamPlayer" parent="ZoomManager"]
+stream = ExtResource("5_bo4m7")
+
+[node name="TerrainManager" type="Node" parent="."]
+script = ExtResource("8_t7x63")
+
+[node name="TerrainImage" type="Sprite2D" parent="TerrainManager"]
+top_level = true
+texture_filter = 5
+material = SubResource("ShaderMaterial_4shen")
 
 [node name="Music" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_ujgab")

@@ -29,6 +29,7 @@ impl MandelbrotImageBuilder {
     #[func]
     fn create_image_data(&mut self, width: i32, height: i32, iterations: u32, bounds: Array<f32>, g_reds: Array<u8>, g_greens: Array<u8>, g_blues: Array<u8>) -> PackedByteArray {
         // Create color vectors.
+        assert!(g_reds.len() == g_greens.len() && g_greens.len() == g_blues.len(), "Provided color vectors did not have equal lengths");
         let mut reds = vec![0u8; g_reds.len()];
         let mut greens = vec![0u8; g_reds.len()];
         let mut blues = vec![0u8; g_reds.len()];
@@ -56,6 +57,25 @@ impl MandelbrotImageBuilder {
     }
 
     #[func]
+    fn generate_terrain_data(&mut self, width: i32, height: i32, data: PackedByteArray) -> PackedByteArray {
+        // Setup terrain data.
+        let mut data_vec = vec![0u8; data.len()];
+        for i in 0..data.len() {
+            data_vec[i] = data.get(i);
+        }
+
+        let mut terrain = PackedByteArray::new();
+
+        // Defer work to kernels
+        match compute_terrain(width as usize, height as usize, data_vec) {
+            Ok(v) => for i in v {terrain.push(i);},
+            Err(e) => panic!("{e}")
+        }
+
+        terrain
+    }
+
+    #[func]
     fn create_image_data_test(&mut self, width: i32, height: i32) -> PackedByteArray {
         let mut data = PackedByteArray::new();
         match compute_test(width, height) {
@@ -70,10 +90,6 @@ impl MandelbrotImageBuilder {
 fn compute_iterations(width: usize, height: usize, iterations: u32, bounds_vec: Vec<f32>,
                       reds: Vec<u8>, greens: Vec<u8>, blues: Vec<u8>) -> ocl::Result<Vec<u8>> {
     let src = r#"
-        float lerp(float min, float max, float weight) {
-            return (min * (1.0f - weight)) + (max * weight);
-        }
-
         __kernel void mandelbrot(__global uchar *data, __global float *bounds, uint MAX_ITERATIONS,
             __global uchar *reds, __global uchar *greens, __global uchar *blues, uint colors) {
             // Get image globals.
@@ -119,11 +135,14 @@ fn compute_iterations(width: usize, height: usize, iterations: u32, bounds_vec: 
     "#;
 
     // Setup dimension and proque.
-    let dims = SpatialDims::new(Some(width), Some(height), Some(3usize))?;
+    let dims = SpatialDims::new(Some(width), Some(height), Some(1usize))?;
     let pro_que = ProQue::builder().src(src).dims(dims).build()?;
 
     // Create data buffers.
-    let data = pro_que.create_buffer::<u8>()?;
+    let data: Buffer<u8> = Buffer::builder()
+        .len(width * height * 3)
+        .queue(pro_que.queue().clone())
+        .build()?;
 
     // let bounds = pro_que.create_buffer::<f32>()?;
     let bounds = Buffer::builder()
@@ -176,6 +195,66 @@ fn compute_iterations(width: usize, height: usize, iterations: u32, bounds_vec: 
     Ok(vec)
 }
 
+fn compute_terrain(width: usize, height: usize, data_vec: Vec<u8>) -> ocl::Result<Vec<u8>> {
+    let src = r#"
+        __kernel void make_terrain(__global uchar *terrain, __global uchar *data) {
+            // Get image globals.
+            int Px = get_global_id(0) * 2;  // 2 from working at a lower resolution
+            int Py = get_global_id(1) * 2;
+            int width = get_global_size(0) * 2;
+            int height = get_global_size(1) * 2;
+
+            // Only work in bounds.
+            if (Px > 0 && Py > 0 && Px < (width - 1) && Py < (height - 1)) {
+                // Calculate indices of adjacent points.
+                int LEFT  = ((Px - 1) + (Py * width)) * 3;  // 3 from iterating over RGB data
+                int RIGHT = ((Px + 1) + (Py * width)) * 3;
+                int UP    = (Px       + ((Py - 1) * width)) * 3;
+                int DOWN  = (Px       + ((Py + 1) * width)) * 3;
+
+                // If we have two 0 neighbors, then set the terrain at this point to max uchar.
+                // Note that we deliberately ensure that the minimum red is 1 so that
+                // we guarantee find 0s as max iteration terrain.
+                int NEIGHBORS = (data[LEFT] == 0) + (data[RIGHT] == 0) + (data[UP] == 0) + (data[DOWN] == 0);
+                if (NEIGHBORS == 3) {
+                    terrain[get_global_id(0) + (get_global_id(1) * get_global_size(0))] = 255;
+                }
+            }
+        }
+    "#;
+
+    // Setup dimension and proque.
+    let dims = SpatialDims::new(Some(width / 2), Some(height / 2), Some(1usize))?;
+    let pro_que = ProQue::builder().src(src).dims(dims).build()?;
+
+    // Create data buffers.
+    let terrain = pro_que.create_buffer::<u8>()?;
+
+    let data = Buffer::builder()
+        .len(data_vec.len())
+        .queue(pro_que.queue().clone())
+        .copy_host_slice(&data_vec)
+        .build()?;
+
+    // Perform kernel.
+    let kernel = pro_que
+    .kernel_builder("make_terrain")
+        .arg(&terrain)
+        .arg(&data)
+    .build()?;
+
+    unsafe {
+        kernel.enq()?;
+    }
+
+    // Retrieve data.
+    let mut vec = vec![0u8; terrain.len()];
+    terrain.read(&mut vec).enq()?;
+
+    // We're done.
+    Ok(vec)
+}
+
 fn compute_test(width: i32, height: i32) -> ocl::Result<Vec<u8>> {
     let src = r#"
         __kernel void test(__global char* buffer, char scalar) {
@@ -202,4 +281,3 @@ fn compute_test(width: i32, height: i32) -> ocl::Result<Vec<u8>> {
 
     Ok(vec)
 }
-
