@@ -1,0 +1,12 @@
+-=- How to build and run the code -=-
+
+An OCL library is required to run the code. I found mine from a random Github release here:
+- https://github.com/GPUOpen-LibrariesAndSDKs/OCL-SDK/releases
+
+Godot 4.2 is required alongside Rust to run the project. I was not able to produce a working standalone application in time, so opening up the game in Godot 4.2 and setting it up with Rust is a requirement.
+- https://godotengine.org/download/archive/4.2-stable/
+- https://godot-rust.github.io/book/intro/setup.html
+
+After setting up rust, you'll want to run `cargo build` in the rust directory to set it up.
+
+This will probably not work out of Windows.
