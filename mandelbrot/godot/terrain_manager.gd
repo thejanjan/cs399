@@ -18,8 +18,8 @@ var vector_points: Array[Vector2] = []
 func _ready() -> void:
 	mandelbrot_texture.new_data.connect(_on_new_data)
 	terrain_image.scale = Vector2(
-		mandelbrot_texture.IMAGE_SCALE * 2,
-		mandelbrot_texture.IMAGE_SCALE * 2
+		mandelbrot_texture.IMAGE_SCALE,
+		mandelbrot_texture.IMAGE_SCALE
 	)
 
 
@@ -36,8 +36,8 @@ func _on_new_data(data: PackedByteArray):
 		_update_terrain_image()
 	
 	# Iterate over the data, create the relevant points.
-	var width:  int = mandelbrot_texture.TEXTURE_WIDTH  / 2
-	var height: int = mandelbrot_texture.TEXTURE_HEIGHT / 2
+	var width:  int = mandelbrot_texture.TEXTURE_WIDTH
+	var height: int = mandelbrot_texture.TEXTURE_HEIGHT
 	vector_points = []
 	for index in terrain_data.size():
 		# Ignore terrainless points.
@@ -64,8 +64,8 @@ func _update_terrain_image():
 	
 	terrain_image.texture = ImageTexture.create_from_image(
 		Image.create_from_data(
-			mandelbrot_texture.TEXTURE_WIDTH / 2,
-			mandelbrot_texture.TEXTURE_HEIGHT / 2,
+			mandelbrot_texture.TEXTURE_WIDTH,
+			mandelbrot_texture.TEXTURE_HEIGHT,
 			false, Image.FORMAT_RGB8, terrain_image_data
 		)
 	)

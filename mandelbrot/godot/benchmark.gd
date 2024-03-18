@@ -74,11 +74,9 @@ func _ready():
 			terrain_points += 1
 	print("Terrain point count: " + str(terrain_points))
 	
-	# Note that the terrain image has a built-in shader to discard
-	# black pixels for test rendering purposes.
-	terrain_image.scale = Vector2(ZOOM_AMOUNT * 2, ZOOM_AMOUNT * 2)
+	terrain_image.scale = Vector2(ZOOM_AMOUNT, ZOOM_AMOUNT)
 	terrain_image.texture = ImageTexture.create_from_image(
-		create_image(render_width / 2, render_height / 2, terrain_image_data)
+		create_image(render_width, render_height, terrain_image_data)
 	)
 
 

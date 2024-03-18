@@ -199,10 +199,10 @@ fn compute_terrain(width: usize, height: usize, data_vec: Vec<u8>) -> ocl::Resul
     let src = r#"
         __kernel void make_terrain(__global uchar *terrain, __global uchar *data) {
             // Get image globals.
-            int Px = get_global_id(0) * 2;  // 2 from working at a lower resolution
-            int Py = get_global_id(1) * 2;
-            int width = get_global_size(0) * 2;
-            int height = get_global_size(1) * 2;
+            int Px = get_global_id(0);
+            int Py = get_global_id(1);
+            int width = get_global_size(0);
+            int height = get_global_size(1);
 
             // Only work in bounds.
             if (Px > 0 && Py > 0 && Px < (width - 1) && Py < (height - 1)) {
@@ -216,15 +216,15 @@ fn compute_terrain(width: usize, height: usize, data_vec: Vec<u8>) -> ocl::Resul
                 // Note that we deliberately ensure that the minimum red is 1 so that
                 // we guarantee find 0s as max iteration terrain.
                 int NEIGHBORS = (data[LEFT] == 0) + (data[RIGHT] == 0) + (data[UP] == 0) + (data[DOWN] == 0);
-                if (NEIGHBORS == 3) {
-                    terrain[get_global_id(0) + (get_global_id(1) * get_global_size(0))] = 255;
+                if (NEIGHBORS == 2) {
+                    terrain[Px + (Py * width)] = 255;
                 }
             }
         }
     "#;
 
     // Setup dimension and proque.
-    let dims = SpatialDims::new(Some(width / 2), Some(height / 2), Some(1usize))?;
+    let dims = SpatialDims::new(Some(width), Some(height), Some(1usize))?;
     let pro_que = ProQue::builder().src(src).dims(dims).build()?;
 
     // Create data buffers.

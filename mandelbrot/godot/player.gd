@@ -58,8 +58,8 @@ func _physics_process(delta: float) -> void:
 		var nearest_point_in_direction: Vector2
 		for point in nearest_points:
 			var point_dist := point.distance_squared_to(position)
-			if (point - position).normalized().dot(movement) > 0.2 and \
-				point_dist < 6400.0 and point_dist > 0.1:
+			if (point - position).normalized().dot(movement) > 0.5 and \
+				point_dist < 1600.0 and point_dist > 0.1:
 				nearest_point_in_direction = point
 				break
 		if nearest_point_in_direction:
