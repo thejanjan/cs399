@@ -3,11 +3,12 @@ extends Node
 @export var PALETTE_SIZE    := 15
 @export var MAX_ITERATIONS  := 32
 @export var BENCHMARK_COUNT := 1
-@export var ZOOM_AMOUNT     := 4.0
+@export var ZOOM_AMOUNT     := 0.5
 
 @onready var mandelbrot_image_builder: MandelbrotImageBuilder = $MandelbrotImageBuilder
 @onready var mandelbrot_image: Sprite2D = $MandelbrotImage
 @onready var terrain_image: Sprite2D = $TerrainImage
+@onready var godot_terrain_builder: Node = $GodotTerrainBuilder
 
 
 var palette_reds: Array[int] = []
@@ -51,7 +52,13 @@ func _ready():
 	print("Kernel mandelbrot: " + str(round((sum / BENCHMARK_COUNT) * 1000.0) / 1000.0) + " seconds")
 	
 	## Benchmark terrain functions
-	## TODO - implement Godot terrain
+	results = []
+	for i in BENCHMARK_COUNT:
+		data = measure_terrain(render_width, render_height, godot_terrain_builder)
+		results.append(data)
+	sum = results.reduce(func(accum, number): return accum + number)
+	print("Godot terrain: " + str(round((sum / BENCHMARK_COUNT) * 1000.0) / 1000.0) + " seconds")
+	
 	results = []
 	for i in BENCHMARK_COUNT:
 		data = measure_terrain(render_width, render_height, mandelbrot_image_builder)

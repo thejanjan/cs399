@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://bsvl15j3lrijm"]
+[gd_scene load_steps=5 format=3 uid="uid://bsvl15j3lrijm"]
 
 [ext_resource type="Script" path="res://benchmark.gd" id="1_5487o"]
 
@@ -14,8 +14,45 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_quc7f"]
 shader = SubResource("Shader_ek7jw")
 
+[sub_resource type="GDScript" id="GDScript_hxao7"]
+resource_name = "GodotTerrainBuilder"
+script/source = "extends Node
+
+
+func generate_terrain_data(width: int, height: int, data: PackedByteArray) -> PackedByteArray:
+	var terrain := PackedByteArray()
+	terrain.resize(width * height)
+	terrain.fill(0)
+	
+	for x in width:
+		for y in height:
+			if (x > 0 and y > 0 and x < (width - 1) and y < (height - 1)):
+				var LEFT  := ((x - 1) + (y * width)) * 3
+				var RIGHT := ((x + 1) + (y * width)) * 3
+				var UP    := ( x      + ((y - 1) * width)) * 3
+				var DOWN  := ( x      + ((y + 1) * width)) * 3
+				
+				var HAS_LEFT := int(data[LEFT] == 0)
+				var HAS_RIGHT := int(data[RIGHT] == 0)
+				var HAS_UP := int(data[UP] == 0)
+				var HAS_DOWN := int(data[DOWN] == 0)
+				var NEIGHBORS = HAS_LEFT + HAS_RIGHT + HAS_UP + HAS_DOWN
+				if (NEIGHBORS == 2 or NEIGHBORS == 3):
+					var HAS_UPRIGHT   := int(data[((x + 1) + ((y + 1) * width)) * 3] == 0)
+					var HAS_UPLEFT    := int(data[((x - 1) + ((y + 1) * width)) * 3] == 0)
+					var HAS_DOWNRIGHT := int(data[((x + 1) + ((y - 1) * width)) * 3] == 0)
+					var HAS_DOWNLEFT  := int(data[((x - 1) + ((y - 1) * width)) * 3] == 0)
+					terrain[x + (y * width)] = HAS_RIGHT + (HAS_UPRIGHT << 1) \\
+						+ (HAS_UP << 2) + (HAS_UPLEFT << 3) \\
+						+ (HAS_LEFT << 4) + (HAS_DOWNLEFT << 4) \\
+						+ (HAS_DOWN << 6) + (HAS_DOWNRIGHT << 7)
+	
+	return terrain
+"
+
 [node name="Benchmark" type="Node"]
 script = ExtResource("1_5487o")
+BENCHMARK_COUNT = 10
 
 [node name="MandelbrotImageBuilder" type="MandelbrotImageBuilder" parent="."]
 
@@ -27,3 +64,6 @@ texture_filter = 5
 material = SubResource("ShaderMaterial_quc7f")
 
 [node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="GodotTerrainBuilder" type="Node" parent="."]
+script = SubResource("GDScript_hxao7")

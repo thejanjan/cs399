@@ -1,5 +1,7 @@
 -=- How to build and run the code -=-
 
+(Note that this probably will not work outside of Windows.)
+
 An OCL library is required to run the code. I found mine from a random Github release here:
 - https://github.com/GPUOpen-LibrariesAndSDKs/OCL-SDK/releases
 
@@ -9,4 +11,4 @@ Godot 4.2 is required alongside Rust to run the project. I was not able to produ
 
 After setting up rust, you'll want to run `cargo build` in the rust directory to set it up.
 
-This will probably not work out of Windows.
+Open godot/project.godot in Godot 4.2, and you'll be able to run the game scene from the top-right. If the main screen renders with the Godot logo in-game (not in the editor), then there's been an issue with the Rust call to render the set.
